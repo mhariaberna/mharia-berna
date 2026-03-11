@@ -457,3 +457,16 @@ section {
 body.no-scroll {
     overflow: hidden;
 }
+
+/* Hide play icon specifically in the fullscreen lightbox on mobile */
+@media (max-width: 1000px) {
+    #videoLightbox .play-icon {
+        display: none !important;
+    }
+}
+
+/* Prevents the background from shifting/scrolling when lightbox is open */
+body.no-scroll {
+    overflow: hidden;
+    height: 100vh;
+}
