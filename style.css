@@ -252,6 +252,9 @@ footer { text-align: center; padding: 60px; font-size: 0.8rem; opacity: 0.4; let
 @media (max-width: 1000px) {
     .hero { padding-top: 120px;}
     .hero-container { flex-direction: column; text-align: center; gap: 50px; }
+    body { min-height: 100vh; padding-bottom: 80px; }
+    section { min-height: auto; padding-bottom: 80px; }
+    .play-icon { display: none; }
     .contact-container { grid-template-columns: 1fr; padding: 40px; }
     .gallery-grid { grid-template-columns: repeat(2, 1fr); max-height: 600px; } /* 2 columns on mobile */
     .video-slide { flex: 0 0 100%; } /* 1 video at a time on mobile */
