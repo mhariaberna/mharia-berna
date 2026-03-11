@@ -1,3 +1,12 @@
+let currentImgIdx = 0;
+let currentVidIdx = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
+// Grab all items for navigation
+const allGalleryImgs = document.querySelectorAll('.art-card img');
+const allGalleryVids = document.querySelectorAll('.video-wrapper video');
+
 // --- REVEAL ON SCROLL LOGIC ---
 const observerOptions = { threshold: 0.15 };
 const observer = new IntersectionObserver((entries) => {
@@ -6,7 +15,6 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
 
 // --- ALTERNATIVE VIDEO SLIDER LOGIC (Bounded, 3 items visible) ---
 const videoSlider = document.getElementById('videoSlider');
@@ -166,43 +174,74 @@ function exitHandler() {
 let currentImageIndex = 0;
 const artCards = document.querySelectorAll('.art-card img');
 
+// --- IMAGE LIGHTBOX LOGIC ---
 function openLightbox(element) {
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
-    const imgElement = element.querySelector('img');
+    const clickedImg = element.querySelector('img');
     
-    currentImageIndex = Array.from(artCards).indexOf(imgElement);
-    lbImg.src = imgElement.src;
+    currentImgIdx = Array.from(allGalleryImgs).indexOf(clickedImg);
+    lbImg.src = clickedImg.src;
     
     lb.style.display = "flex";
-    
-    // Lock the background scrollbar
-    document.body.classList.add('no-scroll'); 
+    document.body.classList.add('no-scroll'); // Hide Scrollbar
 
-    setTimeout(() => {
-        lb.classList.add('active');
-    }, 10);
-}
-
-function changeImage(direction) {
-    currentImageIndex += direction;
-    // Loop around if reaching the end or beginning
-    if (currentImageIndex < 0) currentImageIndex = artCards.length - 1;
-    if (currentImageIndex >= artCards.length) currentImageIndex = 0;
-    
-    document.getElementById('lightbox-img').src = artCards[currentImageIndex].src;
+    setTimeout(() => lb.classList.add('active'), 10);
 }
 
 function closeLightbox() {
     const lb = document.getElementById('lightbox');
     lb.classList.remove('active');
-    
-    // Unlock the background scrollbar
-    document.body.classList.remove('no-scroll'); 
+    document.body.classList.remove('no-scroll'); // Show Scrollbar
+    setTimeout(() => lb.style.display = "none", 400);
+}
+
+function navigateImages(step) {
+    currentImgIdx = (currentImgIdx + step + allGalleryImgs.length) % allGalleryImgs.length;
+    document.getElementById('lightbox-img').src = allGalleryImgs[currentImgIdx].src;
+}
+
+// --- VIDEO LIGHTBOX LOGIC ---
+function toggleFullScreen(videoElement) {
+    const lb = document.getElementById('videoLightbox');
+    const lbVideo = document.getElementById('lightboxVideo');
+    const canvas = document.getElementById('paintCanvas');
+
+    currentVidIdx = Array.from(allGalleryVids).indexOf(videoElement);
+    lbVideo.src = videoElement.querySelector('source').src;
+    lbVideo.load();
+
+    lb.style.display = "flex";
+    lb.appendChild(canvas);
+    document.body.classList.add('no-scroll'); // Hide Scrollbar
+
+    setTimeout(() => {
+        lb.classList.add('active');
+        lbVideo.play();
+    }, 10);
+}
+
+function closeVideoLightbox() {
+    const lb = document.getElementById('videoLightbox');
+    const lbVideo = document.getElementById('lightboxVideo');
+    const canvas = document.getElementById('paintCanvas');
+
+    lbVideo.pause();
+    lb.classList.remove('active');
+    document.body.classList.remove('no-scroll'); // Show Scrollbar
 
     setTimeout(() => {
         lb.style.display = "none";
-    }, 400); 
+        document.body.appendChild(canvas);
+    }, 400);
+}
+
+function navigateVideos(step) {
+    currentVidIdx = (currentVidIdx + step + allGalleryVids.length) % allGalleryVids.length;
+    const lbVideo = document.getElementById('lightboxVideo');
+    lbVideo.src = allGalleryVids[currentVidIdx].querySelector('source').src;
+    lbVideo.load();
+    lbVideo.play();
 }
 
 // --- FAIRY DUST MAGIC TRAIL ---
@@ -344,4 +383,31 @@ videoLightbox.addEventListener('touchstart', e => {
 videoLightbox.addEventListener('touchend', e => {
     touchendX = e.changedTouches[0].screenX;
     handleSwipe('video');
+}, {passive: true});
+
+// --- SWIPE GESTURE ENGINE ---
+function handleGesture(type) {
+    const swipeThreshold = 50; 
+    if (touchEndX < touchStartX - swipeThreshold) {
+        type === 'img' ? navigateImages(1) : navigateVideos(1); // Swipe Left -> Next
+    }
+    if (touchEndX > touchStartX + swipeThreshold) {
+        type === 'img' ? navigateImages(-1) : navigateVideos(-1); // Swipe Right -> Prev
+    }
+}
+
+// Image Lightbox Listeners
+const imgLB = document.getElementById('lightbox');
+imgLB.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+imgLB.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleGesture('img');
+}, {passive: true});
+
+// Video Lightbox Listeners
+const vidLB = document.getElementById('videoLightbox');
+vidLB.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
+vidLB.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleGesture('vid');
 }, {passive: true});
