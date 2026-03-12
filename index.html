@@ -14,18 +14,25 @@
 
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
         <span class="close">&times;</span>
-        <img class="lightbox-content" id="lightbox-img">
+        <button class="lb-nav lb-prev" onclick="event.stopPropagation(); navigateImages(-1)">&#10094;</button>
+        <img class="lightbox-content" id="lightbox-img" onclick="event.stopPropagation()">
+        <button class="lb-nav lb-next" onclick="event.stopPropagation(); navigateImages(1)">&#10095;</button>
     </div>
 
-    <<div id="videoLightbox" class="lightbox">
-        <span class="close" onclick="closeVideoLightbox()">&times;</span>
-        <div class="video-lightbox-wrapper">
+    <div id="videoLightbox" class="lightbox" onclick="closeVideoLightbox()">
+        <span class="close">&times;</span>
+        <button class="lb-nav lb-prev" onclick="event.stopPropagation(); navigateVideos(-1)">&#10094;</button>
+        <div class="video-lightbox-wrapper" onclick="event.stopPropagation()">
             <video id="lightboxVideo" playsinline controls disablePictureInPicture 
                 controlsList="nodownload noplaybackrate nofullscreen" 
                 oncontextmenu="return false;">
                 <source src="" type="video/mp4">
             </video>
         </div>
+        <button class="lb-nav lb-next" onclick="event.stopPropagation(); navigateVideos(1)">&#10095;</button>
+    </div>
+        
+        <button class="lb-nav lb-next" onclick="event.stopPropagation(); navigateVideos(1)">&#10095;</button>
     </div>
 
     <nav class="glass">
