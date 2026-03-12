@@ -1,9 +1,9 @@
+// --- GLOBAL VARIABLES & SELECTIONS ---
 let currentImgIdx = 0;
 let currentVidIdx = 0;
 let touchStartX = 0;
 let touchEndX = 0;
 
-// Grab all items for navigation
 const allGalleryImgs = document.querySelectorAll('.art-card img');
 const allGalleryVids = document.querySelectorAll('.video-wrapper video');
 
@@ -16,62 +16,42 @@ const observer = new IntersectionObserver((entries) => {
 }, observerOptions);
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// --- ALTERNATIVE VIDEO SLIDER LOGIC (Bounded, 3 items visible) ---
+// --- CREATIVE PROCESS VIDEO SLIDER (Infinite Carousel) ---
 const videoSlider = document.getElementById('videoSlider');
-const videoSlides = document.querySelectorAll('.video-slide');
-const totalVideos = videoSlides.length;
-let currentVideoIndex = 0;
-
-function updateVideoSlider() {
-    // Calculates how many items are visible based on screen width
-    const visibleVideos = window.innerWidth > 1000 ? 3 : 1; 
-    
-    // Shift the track by the width of one slide per index
-    const shiftPercentage = currentVideoIndex * (100 / visibleVideos);
-    videoSlider.style.transform = `translateX(-${shiftPercentage}%)`;
-}
-
-function stopAllVideos() {
-    document.querySelectorAll('.video-slide video').forEach(v => {
-        v.pause();
-        // Removed v.play() so there is NO autoplay
-    });
-}
-
 let isSliderAnimating = false;
 
 function moveVideoSlider(direction) {
-    if (isSliderAnimating) return; // Prevents clicking too fast and breaking the animation
-    stopAllVideos(); 
-    isSliderAnimating = true;
+    if (isSliderAnimating) return;
     
+    // Stop all slider videos before moving
+    document.querySelectorAll('.video-slide video').forEach(v => {
+        v.pause();
+        v.currentTime = 0;
+    });
+
+    isSliderAnimating = true;
     const visibleVideos = window.innerWidth > 1000 ? 3 : 1;
     const shiftPercentage = 100 / visibleVideos;
     
     if (direction === 1) {
-        // Sliding Next (Right to Left)
+        // Slide Next
         videoSlider.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
         videoSlider.style.transform = `translateX(-${shiftPercentage}%)`;
         
-        // Wait for the slide to finish, then move the first item to the back
         setTimeout(() => {
             videoSlider.appendChild(videoSlider.firstElementChild);
-            videoSlider.style.transition = 'none'; // Turn off transition for an instant reset
+            videoSlider.style.transition = 'none';
             videoSlider.style.transform = 'translateX(0)';
             isSliderAnimating = false;
-        }, 600); // This 600ms matches your CSS transition time
-        
+        }, 600);
     } else {
-        // Sliding Prev (Left to Right)
-        // Instantly move the last item to the front and offset the container
+        // Slide Prev
         videoSlider.prepend(videoSlider.lastElementChild);
         videoSlider.style.transition = 'none';
         videoSlider.style.transform = `translateX(-${shiftPercentage}%)`;
         
-        // Force the browser to register the instant move before animating
-        void videoSlider.offsetWidth; 
+        void videoSlider.offsetWidth; // Force reflow
         
-        // Animate it back to the natural 0 position
         videoSlider.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
         videoSlider.style.transform = 'translateX(0)';
         
@@ -80,99 +60,6 @@ function moveVideoSlider(direction) {
         }, 600);
     }
 }
-
-// --- FULLSCREEN VIDEO ON CLICK ---
-let currentLbVideoIndex = 0;
-const allVideos = document.querySelectorAll('.video-wrapper video');
-
-function toggleFullScreen(videoElement) {
-    const lb = document.getElementById('videoLightbox');
-    const lbVideo = document.getElementById('lightboxVideo');
-    const source = videoElement.querySelector('source').src;
-    const canvas = document.getElementById('paintCanvas');
-
-    currentLbVideoIndex = Array.from(allVideos).indexOf(videoElement);
-
-    lbVideo.src = source;
-    lbVideo.load();
-
-    lb.style.display = "flex";
-    lb.appendChild(canvas);
-
-    // Lock the background scrollbar
-    document.body.classList.add('no-scroll');
-
-    setTimeout(() => {
-        lb.classList.add('active');
-        lbVideo.play();
-    }, 10);
-}
-
-function changeVideo(direction) {
-    currentLbVideoIndex += direction;
-    // Loop around
-    if (currentLbVideoIndex < 0) currentLbVideoIndex = allVideos.length - 1;
-    if (currentLbVideoIndex >= allVideos.length) currentLbVideoIndex = 0;
-    
-    const lbVideo = document.getElementById('lightboxVideo');
-    lbVideo.src = allVideos[currentLbVideoIndex].querySelector('source').src;
-    lbVideo.load();
-    lbVideo.play();
-}
-
-function closeVideoLightbox() {
-    const lb = document.getElementById('videoLightbox');
-    const lbVideo = document.getElementById('lightboxVideo');
-    const canvas = document.getElementById('paintCanvas');
-
-    lbVideo.pause();
-    lbVideo.currentTime = 0;
-    lb.classList.remove('active');
-    
-    // Unlock the background scrollbar
-    document.body.classList.remove('no-scroll');
-
-    setTimeout(() => {
-        lb.style.display = "none";
-        document.body.appendChild(canvas);
-    }, 400); 
-}
-
-// Update the click listener for the video slides
-document.querySelectorAll('.video-wrapper video').forEach(video => {
-    video.onclick = function() { toggleFullScreen(this); };
-});
-
-// Ensure the canvas goes back to the body when the user presses 'Esc'
-document.addEventListener('fullscreenchange', exitHandler);
-document.addEventListener('webkitfullscreenchange', exitHandler);
-
-// --- LIGHTBOX VIDEO CONTROLS ---
-const lbVideo = document.getElementById('lightboxVideo');
-
-lbVideo.addEventListener("click", function(e) {
-    e.stopPropagation();
-
-    if (lbVideo.paused) {
-        lbVideo.play();
-    } else {
-        lbVideo.pause();
-    }
-});
-
-lbVideo.addEventListener("dblclick", function(e) {
-    e.stopPropagation();
-    closeVideoLightbox();
-});
-
-function exitHandler() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        document.body.appendChild(document.getElementById('paintCanvas'));
-    }
-}
-
-let currentImageIndex = 0;
-const artCards = document.querySelectorAll('.art-card img');
 
 // --- IMAGE LIGHTBOX LOGIC ---
 function openLightbox(element) {
@@ -184,15 +71,14 @@ function openLightbox(element) {
     lbImg.src = clickedImg.src;
     
     lb.style.display = "flex";
-    document.body.classList.add('no-scroll'); // Hide Scrollbar
-
+    document.body.classList.add('no-scroll');
     setTimeout(() => lb.classList.add('active'), 10);
 }
 
 function closeLightbox() {
     const lb = document.getElementById('lightbox');
     lb.classList.remove('active');
-    document.body.classList.remove('no-scroll'); // Show Scrollbar
+    document.body.classList.remove('no-scroll');
     setTimeout(() => lb.style.display = "none", 400);
 }
 
@@ -212,8 +98,8 @@ function toggleFullScreen(videoElement) {
     lbVideo.load();
 
     lb.style.display = "flex";
-    lb.appendChild(canvas);
-    document.body.classList.add('no-scroll'); // Hide Scrollbar
+    lb.appendChild(canvas); // Move fairy dust canvas into lightbox for effect
+    document.body.classList.add('no-scroll');
 
     setTimeout(() => {
         lb.classList.add('active');
@@ -228,11 +114,11 @@ function closeVideoLightbox() {
 
     lbVideo.pause();
     lb.classList.remove('active');
-    document.body.classList.remove('no-scroll'); // Show Scrollbar
+    document.body.classList.remove('no-scroll');
 
     setTimeout(() => {
         lb.style.display = "none";
-        document.body.appendChild(canvas);
+        document.body.appendChild(canvas); // Return canvas to main body
     }, 400);
 }
 
@@ -244,6 +130,25 @@ function navigateVideos(step) {
     lbVideo.play();
 }
 
+// --- GLOBAL EVENT LISTENERS (Background & Keys) ---
+// Close lightbox when clicking the dark background
+document.getElementById("videoLightbox").addEventListener("click", function(e){
+    if(e.target.id === "videoLightbox") closeVideoLightbox();
+});
+
+// ESC key to close everything
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        closeLightbox();
+        closeVideoLightbox();
+    }
+});
+
+// Setup Initial Click Listeners for Videos
+document.querySelectorAll('.video-wrapper video').forEach(video => {
+    video.onclick = function() { toggleFullScreen(this); };
+});
+
 // --- FAIRY DUST MAGIC TRAIL ---
 const canvas = document.getElementById('paintCanvas');
 const ctx = canvas.getContext('2d');
@@ -251,6 +156,7 @@ let particles = [];
 function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resize);
 resize();
+
 document.addEventListener('mousemove', (e) => {
     for(let i = 0; i < 3; i++) {
         particles.push({
@@ -262,6 +168,7 @@ document.addEventListener('mousemove', (e) => {
         });
     }
 });
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(p => {
@@ -276,15 +183,14 @@ function draw() {
 }
 draw();
 
+// --- CONTACT FORM SUBMISSION ---
 document.getElementById('contactForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-
     const form = e.target;
     const submitBtn = document.getElementById('submitBtn');
     const thankYou = document.getElementById('thankYouMessage');
     const formData = new FormData(form);
 
-    // Change the button text to show progress
     submitBtn.textContent = "Sending...";
     submitBtn.style.opacity = "0.5";
 
@@ -292,23 +198,18 @@ document.getElementById('contactForm').addEventListener('submit', async function
         const response = await fetch("https://formspree.io/f/xkoqokyg", {
             method: "POST",
             body: formData,
-            headers: {
-                'Accept': 'application/json'
-            }
+            headers: { 'Accept': 'application/json' }
         });
-
         if (response.ok) {
-            // Smoothly hide form and show the thank you message
             form.style.display = 'none';
             thankYou.style.display = 'flex';
         } else {
-            const data = await response.json();
-            alert(data.errors ? data.errors.map(error => error.message).join(", ") : "Oops! There was a problem.");
+            alert("Oops! There was a problem.");
             submitBtn.textContent = "Submit Inquiry";
             submitBtn.style.opacity = "1";
         }
     } catch (error) {
-        alert("Connectivity error. Please try again later.");
+        alert("Connectivity error.");
         submitBtn.textContent = "Submit Inquiry";
         submitBtn.style.opacity = "1";
     }
@@ -317,97 +218,43 @@ document.getElementById('contactForm').addEventListener('submit', async function
 function resetForm() {
     const form = document.getElementById('contactForm');
     const thankYou = document.getElementById('thankYouMessage');
-    
     thankYou.style.display = 'none';
     form.style.display = 'flex';
     form.reset();
 }
 
-// Close only when clicking outside the video
-document.getElementById("videoLightbox").addEventListener("click", function(e){
-    if(e.target.id === "videoLightbox"){
-        closeVideoLightbox();
-    }
-});
-
-// --- VIDEO HOVER PREVIEW (NETFLIX STYLE) ---
+// --- VIDEO HOVER PREVIEWS ---
 document.querySelectorAll('.video-wrapper video').forEach(video => {
-
-    video.muted = true; // silent preview
-
-    video.addEventListener("mouseenter", () => {
-        video.currentTime = 0;
-        video.play();
-    });
-
-    video.addEventListener("mouseleave", () => {
-        video.pause();
-        video.currentTime = 0;
-    });
-
+    video.muted = true;
+    video.addEventListener("mouseenter", () => { video.currentTime = 0; video.play(); });
+    video.addEventListener("mouseleave", () => { video.pause(); video.currentTime = 0; });
 });
 
-// --- SWIPE GESTURES FOR MOBILE ---
-let touchstartX = 0;
-let touchendX = 0;
-
-function handleSwipe(type) {
-    const minDistance = 50; // minimum swipe distance to register
-    if (touchendX < touchstartX - minDistance) {
-        // Swiped Left -> Go Next
-        if (type === 'image') changeImage(1);
-        if (type === 'video') changeVideo(1);
-    }
-    if (touchendX > touchstartX + minDistance) {
-        // Swiped Right -> Go Prev
-        if (type === 'image') changeImage(-1);
-        if (type === 'video') changeVideo(-1);
-    }
-}
-
-// Image Swipe Listeners
-const imageLightbox = document.getElementById('lightbox');
-imageLightbox.addEventListener('touchstart', e => {
-    touchstartX = e.changedTouches[0].screenX;
-}, {passive: true});
-imageLightbox.addEventListener('touchend', e => {
-    touchendX = e.changedTouches[0].screenX;
-    handleSwipe('image');
-}, {passive: true});
-
-// Video Swipe Listeners
-const videoLightbox = document.getElementById('videoLightbox');
-videoLightbox.addEventListener('touchstart', e => {
-    touchstartX = e.changedTouches[0].screenX;
-}, {passive: true});
-videoLightbox.addEventListener('touchend', e => {
-    touchendX = e.changedTouches[0].screenX;
-    handleSwipe('video');
-}, {passive: true});
-
-// --- SWIPE GESTURE ENGINE ---
+// --- TOUCH & GESTURE ENGINE ---
 function handleGesture(type) {
     const swipeThreshold = 50; 
     if (touchEndX < touchStartX - swipeThreshold) {
-        type === 'img' ? navigateImages(1) : navigateVideos(1); // Swipe Left -> Next
+        // Swipe Left -> Next
+        type === 'img' ? navigateImages(1) : navigateVideos(1);
     }
     if (touchEndX > touchStartX + swipeThreshold) {
-        type === 'img' ? navigateImages(-1) : navigateVideos(-1); // Swipe Right -> Prev
+        // Swipe Right -> Prev
+        type === 'img' ? navigateImages(-1) : navigateVideos(-1);
     }
 }
 
-// Image Lightbox Listeners
+// Image Lightbox Touch Support
 const imgLB = document.getElementById('lightbox');
 imgLB.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
-imgLB.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleGesture('img');
+imgLB.addEventListener('touchend', e => { 
+    touchEndX = e.changedTouches[0].screenX; 
+    handleGesture('img'); 
 }, {passive: true});
 
-// Video Lightbox Listeners
+// Video Lightbox Touch Support
 const vidLB = document.getElementById('videoLightbox');
 vidLB.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, {passive: true});
-vidLB.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleGesture('vid');
+vidLB.addEventListener('touchend', e => { 
+    touchEndX = e.changedTouches[0].screenX; 
+    handleGesture('vid'); 
 }, {passive: true});
