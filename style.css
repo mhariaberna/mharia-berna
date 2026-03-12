@@ -520,3 +520,10 @@ body.no-scroll {
     .lb-prev { left: 10px; }
     .lb-next { right: 10px; }
 }
+
+/* Hide navigation arrows on mobile */
+@media (max-width: 1000px) {
+    .lb-nav {
+        display: none;
+    }
+}
