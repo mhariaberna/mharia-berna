@@ -523,8 +523,11 @@ body.no-scroll {
 
 /* Hide navigation arrows on mobile */
 @media (max-width: 1000px) {
+
+    /* Remove navigation arrows completely on mobile */
     .lb-nav {
-        display: none;
+        display: none !important;
+        pointer-events: none;
     }
 }
 
@@ -557,4 +560,8 @@ video::-webkit-media-controls {
 
 video::-webkit-media-controls-panel {
     display: none !important;
+}
+
+video {
+    touch-action: manipulation;
 }
