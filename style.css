@@ -565,3 +565,27 @@ video::-webkit-media-controls-panel {
 video {
     touch-action: manipulation;
 }
+
+/* MOBILE: Remove navigation buttons */
+@media (max-width: 1000px) {
+    .lb-nav {
+        display: none !important;
+    }
+}
+
+/* --- SHORTS STYLE VERTICAL SLIDE --- */
+
+#lightbox-img,
+#lightboxVideo{
+    transition: transform 0.35s cubic-bezier(.22,.8,.22,1), opacity 0.35s ease;
+}
+
+.slide-up{
+    transform: translateY(-120px);
+    opacity:0;
+}
+
+.slide-down{
+    transform: translateY(120px);
+    opacity:0;
+}
