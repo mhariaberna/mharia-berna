@@ -496,8 +496,6 @@ body.no-scroll {
     }
 }
 
-.lb-prev { left: 40px; }
-.lb-next { right: 40px; }
 
 /* Keep buttons visible but smaller on mobile devices */
 @media (max-width: 1000px) {
@@ -542,16 +540,6 @@ body.no-scroll {
 .lightbox-content,
 #lightboxVideo {
     transition: transform 0.45s cubic-bezier(.22,.8,.22,1), opacity 0.45s ease;
-}
-
-.slide-up {
-    transform: translateY(-80px);
-    opacity: 0;
-}
-
-.slide-down {
-    transform: translateY(80px);
-    opacity: 0;
 }
 
 video::-webkit-media-controls {
