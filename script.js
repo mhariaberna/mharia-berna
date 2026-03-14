@@ -59,18 +59,43 @@ function moveVideoSlider(direction) {
     }
 }
 
-// Mobile Swipe Support for Video Slider
+// Mobile Swipe Support for Video Slider (With Page Scroll Prevention)
 const sliderContainer = document.getElementById('videoSliderContainer');
 let sliderStartX = 0;
+let sliderStartY = 0;
+let isSliderDragging = false;
+
 sliderContainer.addEventListener('touchstart', e => {
     if (window.innerWidth > 1000) return;
     sliderStartX = e.touches[0].clientX;
+    sliderStartY = e.touches[0].clientY;
+    isSliderDragging = true;
 }, {passive: true});
+
+sliderContainer.addEventListener('touchmove', e => {
+    if (!isSliderDragging || window.innerWidth > 1000) return;
+    
+    let deltaX = e.touches[0].clientX - sliderStartX;
+    let deltaY = e.touches[0].clientY - sliderStartY;
+    
+    // If swiping horizontally more than vertically, prevent the page from sliding
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        e.preventDefault(); 
+    }
+}, {passive: false}); // Set to false to allow preventDefault
+
 sliderContainer.addEventListener('touchend', e => {
-    if (window.innerWidth > 1000) return;
+    if (!isSliderDragging || window.innerWidth > 1000) return;
+    isSliderDragging = false;
+    
     let deltaX = e.changedTouches[0].clientX - sliderStartX;
-    if (deltaX < -50) moveVideoSlider(1); // Swipe left -> next
-    if (deltaX > 50) moveVideoSlider(-1); // Swipe right -> prev
+    let deltaY = e.changedTouches[0].clientY - sliderStartY;
+    
+    // Only trigger slide if it was a distinct horizontal swipe
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX < -50) moveVideoSlider(1); // Swipe left -> next
+        if (deltaX > 50) moveVideoSlider(-1); // Swipe right -> prev
+    }
 }, {passive: true});
 
 // --- IMAGE LIGHTBOX LOGIC ---
