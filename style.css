@@ -461,7 +461,6 @@ body.no-scroll {
 .lb-prev { left: 30px; }
 .lb-next { right: 30px; }
 
-
 /* ========================================= */
 /* --- MOBILE SPECIFIC RESPONSIVE UPDATES -- */
 /* ========================================= */
@@ -478,6 +477,11 @@ body.no-scroll {
     .gallery-grid { grid-template-columns: repeat(2, 1fr); max-height: 600px; } 
     .video-slide { flex: 0 0 100%; }
     .social-links { justify-content: center; }
+
+    /* Forces the browser to let our Javascript handle horizontal swipes, stopping the page bounce */
+    #videoSliderContainer {
+        touch-action: pan-y;
+    }
 
     .play-icon {
         display: none !important;
