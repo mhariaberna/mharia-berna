@@ -527,3 +527,45 @@ body.no-scroll {
         display: none;
     }
 }
+
+/* MOBILE REELS MODE */
+@media (max-width:1000px){
+
+.reels-track{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    transition:transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.reel-item{
+    width:100%;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.reel-item img,
+.reel-item video{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+}
+
+/* MOBILE ONLY VIDEO CONTROLS */
+@media (max-width:1000px){
+
+video::-webkit-media-controls{
+display:none !important;
+}
+
+video::-webkit-media-controls-enclosure{
+display:none !important;
+}
+
+}
